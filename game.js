@@ -1,0 +1,167 @@
+const ranks = ["4", "5", "6", "7", "Q", "J", "K", "A", "2", "3"];
+const suits = ["♣", "♥", "♠", "♦"];
+const rankPower = Object.fromEntries(ranks.map((r, i) => [r, i + 1]));
+
+let playerScore = 0;
+let aiScore = 0;
+let handValue = 1;
+let round = 1;
+let playerHand = [];
+let aiHand = [];
+let playerPlayed = null;
+let aiPlayed = null;
+let roundWins = [];
+let gameActive = false;
+
+const el = (id) => document.getElementById(id);
+
+function makeDeck() {
+  const deck = [];
+  for (const rank of ranks) {
+    for (const suit of suits) deck.push({ rank, suit, power: rankPower[rank] });
+  }
+  return deck.sort(() => Math.random() - 0.5);
+}
+
+function cardHTML(card) {
+  return `<div>${card.rank}</div><small>${card.suit}</small>`;
+}
+
+function updateUI(msg = "") {
+  el("playerScore").textContent = playerScore;
+  el("aiScore").textContent = aiScore;
+  el("handValue").textContent = `Vale ${handValue}`;
+  el("roundInfo").textContent = `Rodada ${round}/3`;
+  el("aiCardsCount").textContent = `Cartas da IA: ${aiHand.length}`;
+  el("message").textContent = msg;
+
+  el("playerPlayed").className = playerPlayed ? "card" : "card back";
+  el("playerPlayed").innerHTML = playerPlayed ? cardHTML(playerPlayed) : "?";
+  el("aiPlayed").className = aiPlayed ? "card" : "card back";
+  el("aiPlayed").innerHTML = aiPlayed ? cardHTML(aiPlayed) : "?";
+
+  const hand = el("playerHand");
+  hand.innerHTML = "";
+  playerHand.forEach((card, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = cardHTML(card);
+    div.onclick = () => playCard(index);
+    hand.appendChild(div);
+  });
+
+  el("trucoBtn").disabled = !gameActive || handValue >= 12;
+  el("runBtn").disabled = !gameActive;
+}
+
+function newHand() {
+  if (playerScore >= 12 || aiScore >= 12) {
+    playerScore = 0; aiScore = 0;
+  }
+  const deck = makeDeck();
+  playerHand = deck.splice(0, 3);
+  aiHand = deck.splice(0, 3);
+  handValue = (playerScore === 11 || aiScore === 11) ? 3 : 1;
+  round = 1;
+  roundWins = [];
+  playerPlayed = null;
+  aiPlayed = null;
+  gameActive = true;
+  updateUI(handValue === 3 ? "Mão de 11: vale 3. Jogue ou corra." : "Escolha uma carta para jogar.");
+}
+
+function playCard(index) {
+  if (!gameActive) return;
+  playerPlayed = playerHand.splice(index, 1)[0];
+  aiPlayed = chooseAiCard();
+  setTimeout(resolveRound, 450);
+  updateUI("IA jogou. Comparando cartas...");
+}
+
+function chooseAiCard() {
+  // IA simples: joga uma carta fraca quando puder, guarda carta forte para depois.
+  aiHand.sort((a, b) => a.power - b.power);
+  let selectedIndex = 0;
+  if (playerPlayed) {
+    const winningIndex = aiHand.findIndex(c => c.power > playerPlayed.power);
+    selectedIndex = winningIndex >= 0 ? winningIndex : 0;
+  }
+  return aiHand.splice(selectedIndex, 1)[0];
+}
+
+function resolveRound() {
+  let result;
+  if (playerPlayed.power > aiPlayed.power) result = "player";
+  else if (aiPlayed.power > playerPlayed.power) result = "ai";
+  else result = "draw";
+
+  roundWins.push(result);
+  let msg = result === "player" ? "Você ganhou a rodada." : result === "ai" ? "IA ganhou a rodada." : "Rodada empatou.";
+
+  const handWinner = checkHandWinner();
+  if (handWinner) return finishHand(handWinner, msg);
+
+  round++;
+  playerPlayed = null;
+  aiPlayed = null;
+  updateUI(`${msg} Agora escolha outra carta.`);
+}
+
+function checkHandWinner() {
+  const p = roundWins.filter(x => x === "player").length;
+  const a = roundWins.filter(x => x === "ai").length;
+  if (p >= 2) return "player";
+  if (a >= 2) return "ai";
+  if (roundWins.length === 3) {
+    if (p > a) return "player";
+    if (a > p) return "ai";
+    const firstWinner = roundWins.find(x => x !== "draw");
+    if (firstWinner) return firstWinner;
+    return "none";
+  }
+  return null;
+}
+
+function finishHand(winner, prefix) {
+  gameActive = false;
+  if (winner === "player") {
+    playerScore += handValue;
+    prefix += ` Você fez ${handValue} ponto(s).`;
+  } else if (winner === "ai") {
+    aiScore += handValue;
+    prefix += ` IA fez ${handValue} ponto(s).`;
+  } else {
+    prefix += " As 3 rodadas empataram. Ninguém pontua.";
+  }
+
+  if (playerScore >= 12) prefix += " Você ganhou o jogo!";
+  if (aiScore >= 12) prefix += " IA ganhou o jogo!";
+  updateUI(prefix + " Clique em Nova mão.");
+}
+
+function askTruco() {
+  if (!gameActive || handValue >= 12) return;
+  const next = handValue === 1 ? 3 : handValue + 3;
+  // IA aceita mais quando tem cartas fortes.
+  const avg = aiHand.reduce((s, c) => s + c.power, 0) / Math.max(aiHand.length, 1);
+  if (avg >= 6 || Math.random() > 0.35) {
+    handValue = next;
+    updateUI(`Você pediu truco. IA aceitou! Agora vale ${handValue}.`);
+  } else {
+    gameActive = false;
+    playerScore += handValue;
+    updateUI(`Você pediu truco. IA correu. Você ganhou ${handValue} ponto(s).`);
+  }
+}
+
+function run() {
+  if (!gameActive) return;
+  gameActive = false;
+  aiScore += handValue;
+  updateUI(`Você correu. IA ganhou ${handValue} ponto(s). Clique em Nova mão.`);
+}
+
+el("newHandBtn").onclick = newHand;
+el("trucoBtn").onclick = askTruco;
+el("runBtn").onclick = run;
+updateUI("Clique em Nova mão para começar.");

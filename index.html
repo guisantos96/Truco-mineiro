@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Truco Mineiro</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="scoreboard">
+      <div><span>Você</span><strong id="playerScore">0</strong></div>
+      <div class="middle"><b id="handValue">Vale 1</b><span id="roundInfo">Rodada 1/3</span></div>
+      <div><span>IA</span><strong id="aiScore">0</strong></div>
+    </section>
+
+    <section class="table">
+      <h1>Mini Truco Mineiro</h1>
+      <p id="aiCardsCount">Cartas da IA: 0</p>
+
+      <div class="played-area">
+        <div>
+          <span>IA jogou</span>
+          <div id="aiPlayed" class="card back">?</div>
+        </div>
+        <div>
+          <span>Você jogou</span>
+          <div id="playerPlayed" class="card back">?</div>
+        </div>
+      </div>
+
+      <h2>Sua mão</h2>
+      <div id="playerHand" class="hand"></div>
+    </section>
+
+    <section class="buttons">
+      <button id="newHandBtn">Nova mão</button>
+      <button id="trucoBtn" class="red">Pedir truco</button>
+      <button id="runBtn" class="gray">Correr</button>
+    </section>
+
+    <section id="message" class="message">Clique em “Nova mão” para começar.</section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #075f34;
+  color: white;
+}
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 18px;
+}
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #043d25;
+  border-radius: 28px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.scoreboard div { text-align: center; }
+.scoreboard span { display: block; font-size: 20px; opacity: .85; }
+.scoreboard strong { font-size: 46px; }
+.middle b {
+  display: block;
+  background: #ffd84d;
+  color: #111;
+  padding: 12px 34px;
+  border-radius: 999px;
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+.middle span { font-size: 25px; }
+.table {
+  min-height: 540px;
+  border: 4px solid rgba(255,255,255,.25);
+  border-radius: 36px;
+  padding: 22px;
+  background: #118349;
+  text-align: center;
+}
+h1 { margin: 0 0 8px; font-size: 26px; }
+.played-area {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  margin: 18px 0 28px;
+}
+.played-area span { display: block; font-size: 18px; margin-bottom: 8px; }
+.card {
+  width: 86px;
+  height: 124px;
+  border-radius: 14px;
+  background: #fff;
+  color: #111;
+  border: 4px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 34px;
+  box-shadow: 0 8px 0 rgba(0,0,0,.18);
+  user-select: none;
+}
+.card small { font-size: 22px; margin-top: 6px; }
+.back {
+  background: #174caf;
+  color: white;
+}
+.hand {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 140px;
+}
+.hand .card { cursor: pointer; transition: transform .15s; }
+.hand .card:active { transform: translateY(-8px); }
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+button {
+  flex: 1;
+  border: none;
+  border-radius: 18px;
+  padding: 18px 10px;
+  font-size: 19px;
+  font-weight: 800;
+  background: #ffd84d;
+}
+button.red { background: #ef4141; color: white; }
+button.gray { background: #eee; color: #147ce5; }
+button:disabled { opacity: .45; }
+.message {
+  background: #043d25;
+  border-radius: 18px;
+  padding: 18px;
+  font-size: 20px;
+  line-height: 1.35;
+}
