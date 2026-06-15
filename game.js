@@ -1,6 +1,29 @@
 const ranks = ["4", "5", "6", "7", "Q", "J", "K", "A", "2", "3"];
 const suits = ["♣", "♥", "♠", "♦"];
-const rankPower = Object.fromEntries(ranks.map((r, i) => [r, i + 1]));
+
+// Truco Mineiro com manilhas fixas:
+// 4♣ (Zap) > 7♥ > A♠ > 7♦ > 3 > 2 > A > K > J > Q > 7 > 6 > 5 > 4
+// Observação: as cartas que são manilhas recebem força especial e ficam acima de todas as outras.
+const rankPower = {
+  "4": 1,
+  "5": 2,
+  "6": 3,
+  "7": 4,
+  "Q": 5,
+  "J": 6,
+  "K": 7,
+  "A": 8,
+  "2": 9,
+  "3": 10
+};
+
+function getCardPower(rank, suit) {
+  if (rank === "4" && suit === "♣") return 14; // Zap
+  if (rank === "7" && suit === "♥") return 13; // 7 de copas
+  if (rank === "A" && suit === "♠") return 12; // Espadilha
+  if (rank === "7" && suit === "♦") return 11; // 7 de ouros
+  return rankPower[rank];
+}
 
 let playerScore = 0;
 let aiScore = 0;
@@ -19,7 +42,7 @@ const el = (id) => document.getElementById(id);
 function makeDeck() {
   const deck = [];
   for (const rank of ranks) {
-    for (const suit of suits) deck.push({ rank, suit, power: rankPower[rank] });
+    for (const suit of suits) deck.push({ rank, suit, power: getCardPower(rank, suit) });
   }
   return deck.sort(() => Math.random() - 0.5);
 }
