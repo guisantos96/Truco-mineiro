@@ -102,3 +102,5 @@ button:disabled { opacity: .45; }
   font-size: 20px;
   line-height: 1.35;
 }
+
+.hand .card.disabled { opacity: .55; pointer-events: none; }

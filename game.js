@@ -12,6 +12,7 @@ let playerPlayed = null;
 let aiPlayed = null;
 let roundWins = [];
 let gameActive = false;
+let waitingAi = false;
 
 const el = (id) => document.getElementById(id);
 
@@ -47,11 +48,12 @@ function updateUI(msg = "") {
     div.className = "card";
     div.innerHTML = cardHTML(card);
     div.onclick = () => playCard(index);
+    if (waitingAi) div.classList.add("disabled");
     hand.appendChild(div);
   });
 
-  el("trucoBtn").disabled = !gameActive || handValue >= 12;
-  el("runBtn").disabled = !gameActive;
+  el("trucoBtn").disabled = !gameActive || waitingAi || handValue >= 12;
+  el("runBtn").disabled = !gameActive || waitingAi;
 }
 
 function newHand() {
@@ -67,15 +69,29 @@ function newHand() {
   playerPlayed = null;
   aiPlayed = null;
   gameActive = true;
+  waitingAi = false;
   updateUI(handValue === 3 ? "Mão de 11: vale 3. Jogue ou corra." : "Escolha uma carta para jogar.");
 }
 
 function playCard(index) {
-  if (!gameActive) return;
+  if (!gameActive || waitingAi) return;
+
   playerPlayed = playerHand.splice(index, 1)[0];
-  aiPlayed = chooseAiCard();
-  setTimeout(resolveRound, 450);
-  updateUI("IA jogou. Comparando cartas...");
+  aiPlayed = null;
+  waitingAi = true;
+
+  updateUI(`Você jogou ${playerPlayed.rank}${playerPlayed.suit}. Aguardando a IA...`);
+
+  setTimeout(() => {
+    if (!gameActive) return;
+    aiPlayed = chooseAiCard();
+    updateUI(`IA jogou ${aiPlayed.rank}${aiPlayed.suit}. Comparando cartas...`);
+
+    setTimeout(() => {
+      waitingAi = false;
+      resolveRound();
+    }, 900);
+  }, 1300);
 }
 
 function chooseAiCard() {
@@ -124,6 +140,7 @@ function checkHandWinner() {
 
 function finishHand(winner, prefix) {
   gameActive = false;
+  waitingAi = false;
   if (winner === "player") {
     playerScore += handValue;
     prefix += ` Você fez ${handValue} ponto(s).`;
@@ -149,6 +166,7 @@ function askTruco() {
     updateUI(`Você pediu truco. IA aceitou! Agora vale ${handValue}.`);
   } else {
     gameActive = false;
+    waitingAi = false;
     playerScore += handValue;
     updateUI(`Você pediu truco. IA correu. Você ganhou ${handValue} ponto(s).`);
   }
@@ -157,6 +175,7 @@ function askTruco() {
 function run() {
   if (!gameActive) return;
   gameActive = false;
+  waitingAi = false;
   aiScore += handValue;
   updateUI(`Você correu. IA ganhou ${handValue} ponto(s). Clique em Nova mão.`);
 }
